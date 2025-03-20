@@ -31,7 +31,7 @@ model:
   num_hidden_layers: 2
   capacity: 256
 data:
-  data_dir: ../../data/gsi
+  data_dir: /mnt/pan/SOM_CVRI_JXD101/DATA_SCIENCE/GIS/Multi_Geo_CLIP/data/gsi/
   batch_size: 512
   num_workers: 8
   val_random_split_fraction: 0.1
