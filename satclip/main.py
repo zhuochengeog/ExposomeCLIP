@@ -5,6 +5,7 @@ import lightning.pytorch
 import torch
 # from datamodules.s2geo_dataset import S2GeoDataModule
 from datamodules.gsi_dataset import GSIDataModule
+from datamodules.gsv_dataset import GSVDataModule
 from lightning.pytorch.cli import LightningCLI
 from loss import SatCLIPLoss
 from model import SatCLIP
@@ -117,7 +118,8 @@ def cli_main(default_config_filename="./configs/default.yaml"):
     # modify configs/default.yaml for learning rate etc.
     cli = MyLightningCLI(
         model_class=SatCLIPLightningModule,
-        datamodule_class=GSIDataModule,
+        # datamodule_class=GSIDataModule,
+        datamodule_class=GSVDataModule,
         save_config_kwargs=dict(
             config_filename=save_config_fn,
             overwrite=True,

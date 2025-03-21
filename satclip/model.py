@@ -11,6 +11,8 @@ import timm
 import torchgeo.models
 from torchgeo.models import ResNet18_Weights, ResNet50_Weights, ViTSmall16_Weights, DOFABase16_Weights, dofa_base_patch16_224
 from location_encoder import get_positional_encoding, get_neural_network, LocationEncoder
+import transformers
+from transformers import CLIPModel
 # from datamodules.s2geo_dataset import S2Geo
 
 class Bottleneck(nn.Module):
@@ -245,6 +247,24 @@ class VisionTransformer(nn.Module):
 
         return x
 
+class CLIPVitImageEncoder(nn.Module):    ### Taken from GeoCLIP: https://github.com/VicenteVivan/geo-clip
+    def __init__(self):
+        super(CLIPVitImageEncoder, self).__init__()
+        self.CLIP = CLIPModel.from_pretrained("openai/clip-vit-large-patch14")
+        self.mlp = nn.Sequential(nn.Linear(768, 768),
+                                 nn.ReLU(),
+                                 nn.Linear(768, 512))
+
+        # Freeze CLIP
+        for param in self.CLIP.parameters():
+            param.requires_grad = False
+
+    def forward(self, x):
+        # print("Input shape to CLIP:", x.shape)
+        x = self.CLIP.get_image_features(pixel_values=x)
+        x = self.mlp(x)
+        return x
+
 class SatCLIP(nn.Module):
     def __init__(self,
                  embed_dim: int,
@@ -310,7 +330,7 @@ class SatCLIP(nn.Module):
             self.visual.requires_grad_(False)
             self.visual.head.requires_grad_(True)
 
-        elif vision_layers == 'dofa_vit16':
+        elif vision_layers == 'dofa_vit16':   # for gsi image
             print('using pretrained dofa vit16')
             self.visual = dofa_base_patch16_224(weights=DOFABase16_Weights.DOFA_MAE)
 
@@ -325,7 +345,7 @@ class SatCLIP(nn.Module):
             norm = nn.LayerNorm(in_features)
             fc_norm = nn.Identity()
             head_drop = nn.Dropout(p=0.0)
-            head = nn.Linear(in_features, 512)
+            head = nn.Linear(in_features, embed_dim)
 
             # Assign the layers directly to the model
             self.visual.norm = norm
@@ -340,6 +360,10 @@ class SatCLIP(nn.Module):
             # Enable gradient for the head
             for param in self.visual.head.parameters():
                 param.requires_grad = True
+        
+        elif vision_layers == 'clip-vit':  # for gsv image
+            print('using pretrained CLIP model')
+            self.visual = CLIPVitImageEncoder()
 
         else:
             print('using vision transformer')
@@ -384,6 +408,8 @@ class SatCLIP(nn.Module):
             return self.visual.patch_embed.weight_generator.fc_weight.weight.dtype
         elif isinstance(self.visual, timm.models.vision_transformer.VisionTransformer):
             return self.visual.patch_embed.proj.weight.dtype
+        elif isinstance(self.visual, CLIPVitImageEncoder):
+            return self.visual.CLIP.text_model.embeddings.token_embedding.weight.dtype
         else:
             return self.visual.conv1.weight.dtype
 

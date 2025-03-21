@@ -17,7 +17,7 @@ trainer:
 model:
   embed_dim: 512
   image_resolution: 224
-  vision_layers: 'dofa_vit16'
+  vision_layers: 'clip-vit'
   vision_width: 128
   vision_patch_size: 32
   in_channels: 13
@@ -31,8 +31,8 @@ model:
   num_hidden_layers: 2
   capacity: 256
 data:
-  data_dir: /mnt/pan/SOM_CVRI_JXD101/DATA_SCIENCE/GIS/Multi_Geo_CLIP/data/gsi/
-  batch_size: 512
+  data_dir: /mnt/pan/SOM_CVRI_JXD101/DATA_SCIENCE/GIS/Multi_Geo_CLIP/data/gsv/
+  batch_size: 256
   num_workers: 8
   val_random_split_fraction: 0.1
 watchmodel: True

@@ -104,7 +104,7 @@ class GSVDataset(NonGeoDataset):
             if self.limit is not None and n_loaded_files >= self.limit:
                 break
 
-            filename = os.path.join(self.root, "images", df.iloc[i]["filename"])
+            filename = os.path.join(self.root, "images", df.iloc[i]["fn"])
             if not os.path.exists(filename) or os.path.getsize(filename) < CHECK_MIN_FILESIZE:
                 n_skipped_files += 1
                 continue

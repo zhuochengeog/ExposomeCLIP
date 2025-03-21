@@ -112,7 +112,7 @@ def get_pretrained_gsv_train_transform(image_processor):
         point = sample["point"]  
 
         # Process image using CLIP processor
-        processed_image = image_processor(images=image, return_tensors="pt")["pixel_values"].squeeze(0)  # Shape: [3, 224, 224]
+        image = image_processor(images=image, return_tensors="pt")["pixel_values"].squeeze(0)  # Shape: [3, 224, 224]
 
         # Optional: Jitter the coordinates
         point = coordinate_jitter(point, radius=0.0001)
